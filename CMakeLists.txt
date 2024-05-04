@@ -25,8 +25,6 @@ set(SOURCE_LIST
 
 set(INCLUDE_LIST ${PROJECT_SOURCE_DIR}/include)
 
-add_subdirectory(dependencies)
-
 add_library(${LIBRARY_NAME} STATIC ${SOURCE_LIST})
 target_include_directories(${LIBRARY_NAME} PUBLIC ${INCLUDE_LIST})
 target_link_libraries(${LIBRARY_NAME} pthread)
