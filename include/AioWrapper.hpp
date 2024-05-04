@@ -1,9 +1,10 @@
 #pragma once
 
-class AioWrapper {
-    public:
-        AioWrapper();
-        ~AioWrapper();
+class AioWrapper
+{
+public:
+    AioWrapper();
+    ~AioWrapper();
 
-    private:
+private:
 };
