@@ -35,7 +35,9 @@ void AioWrapper::Read(std::vector<AioInfo>& aioInfos, bool sync)
                         info.readBuf,
                         info.readSize,
                         info.offset);
-        ::io_set_callback(ioConfigs_[i], &WrapperCFunc::WrapperFunc);
+        if (WrapperCFunc::replacedFunc != nullptr) {
+            ::io_set_callback(ioConfigs_[i], &WrapperCFunc::WrapperFunc);
+        }
     }
     Submit(static_cast<std::int64_t>(aioInfos.size()), sync);
 }
@@ -60,10 +62,12 @@ void AioWrapper::WaitReqComplete(std::int64_t submitNum)
         totalCompleEvt += completeEvt;
         for (int i = 0; i < completeEvt; i++) {
             auto callback = reinterpret_cast<io_callback_t>(events_[i].data);
-            struct iocb* ioConfig = events_[i].obj;
+            if (callback == nullptr) {
+                continue;
+            }
 
             callback(ioCtx_,
-                     ioConfig,
+                     events_[i].obj,
                      static_cast<std::int64_t>(events_[i].res),
                      static_cast<std::int64_t>(events_[i].res2));
         }
