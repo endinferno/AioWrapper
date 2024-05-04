@@ -28,7 +28,7 @@ set(INCLUDE_LIST ${PROJECT_SOURCE_DIR}/include)
 add_library(${LIBRARY_NAME} STATIC ${SOURCE_LIST})
 target_include_directories(${LIBRARY_NAME} PUBLIC ${INCLUDE_LIST})
 target_link_libraries(${LIBRARY_NAME} pthread)
-target_link_libraries(${LIBRARY_NAME} fmt)
+target_link_libraries(${LIBRARY_NAME} aio)
 install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
 
 add_subdirectory(examples)
