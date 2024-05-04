@@ -28,6 +28,8 @@ public:
 private:
     void InitIoContext();
     void InitIoConfig();
+    void DeinitIoContext();
+    void DeinitIoConfig();
     void Submit(std::int64_t submitNum, bool sync);
     void WaitReqComplete(std::int64_t submitNum);
 

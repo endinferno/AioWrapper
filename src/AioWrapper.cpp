@@ -23,7 +23,8 @@ AioWrapper::AioWrapper(ReadCallback readCallback)
 
 AioWrapper::~AioWrapper()
 {
-    ::io_destroy(ioCtx_);
+    DeinitIoConfig();
+    DeinitIoContext();
 }
 
 void AioWrapper::Read(std::vector<AioInfo>& aioInfos, bool sync)
@@ -90,5 +91,17 @@ void AioWrapper::InitIoConfig()
 {
     for (auto& ioConfig : ioConfigs_) {
         ioConfig = new iocb();
+    }
+}
+
+void AioWrapper::DeinitIoContext()
+{
+    ::io_destroy(ioCtx_);
+}
+
+void AioWrapper::DeinitIoConfig()
+{
+    for (auto& ioConfig : ioConfigs_) {
+        delete ioConfig;
     }
 }
