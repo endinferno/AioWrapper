@@ -42,12 +42,16 @@ void* AllocAlign(size_t allocSize)
     return readBuf;
 }
 
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+    if (argc == 1) {
+        printf("Usage: AsyncReader [file-name]");
+        exit(1);
+    }
+    const std::string fileName = argv[1];
     constexpr int READ_SIZE = 1024;
     AioWrapper aioWrapper(ReadCallback);
-    int fileFd = OpenFile("test");
+    int fileFd = OpenFile(fileName);
     void* readBuf = AllocAlign(READ_SIZE);
 
     std::vector<AioInfo> aioInfos;
