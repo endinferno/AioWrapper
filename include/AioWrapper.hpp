@@ -35,5 +35,4 @@ private:
     io_context_t ioCtx_;
     std::vector<struct iocb*> ioConfigs_;
     std::vector<struct io_event> events_;
-    ReadCallback readCallback_;
 };

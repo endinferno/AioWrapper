@@ -1,13 +1,24 @@
 #include "AioWrapper.hpp"
 #include <libaio.h>
 
+struct WrapperCFunc
+{
+public:
+    static void WrapperFunc(io_context_t ioCtx, struct iocb* ioConfig,
+                            std::int64_t res, std::int64_t res2)
+    {
+        replacedFunc(ioCtx, ioConfig, res, res2);
+    }
+    inline static AioWrapper::ReadCallback replacedFunc;
+};
+
 AioWrapper::AioWrapper(ReadCallback readCallback)
     : ioConfigs_(AIO_MAXIO_)
     , events_(AIO_MAXIO_)
-    , readCallback_(std::move(readCallback))
 {
     InitIoContext();
     InitIoConfig();
+    WrapperCFunc::replacedFunc = std::move(readCallback);
 }
 
 AioWrapper::~AioWrapper()
@@ -24,6 +35,7 @@ void AioWrapper::Read(std::vector<AioInfo>& aioInfos, bool sync)
                         info.readBuf,
                         info.readSize,
                         info.offset);
+        ::io_set_callback(ioConfigs_[i], &WrapperCFunc::WrapperFunc);
     }
     Submit(static_cast<std::int64_t>(aioInfos.size()), sync);
 }
@@ -41,11 +53,21 @@ void AioWrapper::Submit(std::int64_t submitNum, bool sync)
 
 void AioWrapper::WaitReqComplete(std::int64_t submitNum)
 {
-    int completeEvt = 0;
+    int totalCompleEvt = 0;
     while (true) {
-        completeEvt +=
+        int completeEvt =
             ::io_getevents(ioCtx_, 1, AIO_MAXIO_, events_.data(), nullptr);
-        if (completeEvt == submitNum) {
+        totalCompleEvt += completeEvt;
+        for (int i = 0; i < completeEvt; i++) {
+            auto callback = reinterpret_cast<io_callback_t>(events_[i].data);
+            struct iocb* ioConfig = events_[i].obj;
+
+            callback(ioCtx_,
+                     ioConfig,
+                     static_cast<std::int64_t>(events_[i].res),
+                     static_cast<std::int64_t>(events_[i].res2));
+        }
+        if (totalCompleEvt == submitNum) {
             break;
         }
     }
